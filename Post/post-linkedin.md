@@ -1,25 +1,33 @@
-Escrevi "gostaria de agendar uma consulta na data de hoje com a Dra Carol" e voltou isto:
+Construí um agente de IA para marcar consultas médicas.
 
-"Olá, Rafael de Andrade! Sua consulta com a Dra. Carol Gomes em 10 de novembro de 2026 foi confirmada com sucesso."
+A parte mais importante do projeto foi decidir onde a IA não entra.
 
-Não preenchi formulário nem escolhi médico em dropdown. Também não digitei data em formato nenhum.
+A ideia é simples: o paciente escreve "quero marcar hoje com a Dra Carol" e o agente resolve. Sem formulário nem dropdown de médico.
 
-Esse é um dos projetos que fiz na pós em Engenharia de IA Aplicada com o Erick Wendel. É um agente de agendamento médico feito com LangGraph, e a parte que mais me ensinou foi decidir onde a IA NÃO entra.
+O jeito ingênuo seria um prompt gigante com a agenda dentro, torcendo para o modelo não inventar horário.
 
-O fluxo é um grafo com 4 nós:
+Eu dividi o trabalho num grafo com LangGraph:
 
-1. identifyIntent: o LLM lê a mensagem, decide se a pessoa quer agendar, cancelar ou se é outro assunto, e extrai nome, profissional, data e motivo. "Dra Carol" vira o ID 3, "hoje" vira data ISO.
-2. schedule / cancel: código comum, sem LLM. Verifica se o horário está livre e grava na agenda.
-3. message: o LLM volta só pra escrever a resposta pro paciente.
+→ o LLM lê a mensagem, entende se é agendamento ou cancelamento e extrai os dados. "Dra Carol" vira o ID 3, "hoje" vira data.
 
-Toda saída do modelo passa por um schema Zod. Se ele inventar um campo ou esquecer o médico, o grafo vai pro caminho de erro e o paciente recebe uma explicação, sem nada errado gravado na agenda.
+→ código comum confere se o horário está livre e grava na agenda. Aqui não tem IA.
 
-Antes eu teria jogado tudo num prompt gigante e torcido pra dar certo. Separar "entender" de "executar" deixou o agente bem mais previsível, e muito mais fácil de testar. Os testes E2E chamam o modelo de verdade, sem mock.
+→ o LLM volta só no fim, para escrever a resposta para o paciente.
 
-Stack: Node 24 com TypeScript nativo, LangGraph, LangChain, OpenRouter, Fastify e Zod. Usei o LangGraph Studio pra visualizar o grafo (print abaixo) e o LangSmith pro tracing.
+Toda saída do modelo passa por um schema Zod. Se ele esquecer o médico ou inventar um campo, o fluxo cai no caminho de erro e o paciente recebe uma explicação. Na agenda, nada errado entra.
 
-Próximo passo é dar memória pra conversa, pra quando faltar um dado ele perguntar e continuar de onde parou em vez de devolver erro.
+Fiquei com isso: o LLM é ótimo para entender e escrever. Para decidir, regra de negócio continua ganhando.
 
-Código no GitHub: [link do repositório]
+Fiz o projeto na pós em Engenharia de IA Aplicada com o Erick Wendel. O próximo passo é dar memória para a conversa, para o agente perguntar o que faltou em vez de devolver erro.
 
-#LangGraph #IA #TypeScript #NodeJS
+Quem já colocou agente em produção: onde vocês traçaram essa linha?
+
+Código no primeiro comentário.
+
+#IA #LangGraph #TypeScript #NodeJS #DevBR
+
+---
+
+PRIMEIRO COMENTÁRIO (cole logo depois de publicar):
+
+Repositório com README, diagrama do grafo e testes E2E: [link do repositório]
